@@ -1,4 +1,7 @@
+# 디자인
+
 import pygame
+import numpy
 
 # 게임 디자인 설정
 class Board():
@@ -9,6 +12,7 @@ class Board():
         self.width = 2
         self.size = 20*19
         self.b_color = (240,230,180) # board_color
+        self.board_list = []
         #격자
         self.grid_size = 20
         self.grid_color = (0,0,0)
@@ -16,6 +20,13 @@ class Board():
     def drawgrid (self, start_pos_list, end_pos_list, color, width):
         pygame.draw.line(screen, color, start_pos_list, end_pos_list, width)
         return 0;
+    
+    def newBoardList (self):
+        for i in range(19):
+            temp_list = []
+            for j in range(19):
+                temp_list.append(0)
+            self.board_list.append(temp_list[:])
     
     
 # 배경 디자인
@@ -28,8 +39,8 @@ class Design():
 # 흑돌 백돌
 class Ball():
     def __init__(self):
-        self.black = {'color':(0,0,0), 'num':0, 'pos':[]}
-        self.white = {'color':(255,255,255), 'num':1, 'pos':[]}
+        self.black = {'color':(0,0,0), 'num':1, 'pos':[], 'boardPos':[]}
+        self.white = {'color':(255,255,255), 'num':2, 'pos':[], 'boardPos':[]}
         self.size = 7
     
     def draw(self, position, turn): #turn은 흑돌 백돌 순서
@@ -38,6 +49,18 @@ class Ball():
         if turn%2 == 1:
             pygame.draw.circle(screen, self.white['color'], position, self.size)
         
+        
+class GameRule():
+    pass
+
+class GamePlay():
+    def __init__(self):
+        pass
+    def ballPos_to_boardList(self, ball_pos, board):  # 착수 위치 리스트 인덱스로 반환
+        ball_list_pos_x = (ball_pos[0] - board.x)//20
+        ball_list_pos_y = (ball_pos[1] - board.y)//20
+        ball_boardList_pos = (ball_list_pos_x, ball_list_pos_y)
+        return ball_boardList_pos
     
 # 화면 그리기
 def draw_screen (screen, design, board, ball, turn):
@@ -96,13 +119,18 @@ def ball_fit_pos (position, board, ball):
         count =1
 
     if count == 1:
-        print('정확한 위치에 다시 놓아주세요.')
+        return 0
+        
     return (x,y)
 
+# 실행
 
-board = Board()
+board = Board(); board.newBoardList()
 design = Design()
 ball = Ball()
+gameplay = GamePlay()
+
+
 turn = 0
 ### pygame 설정 ----------
 
@@ -125,13 +153,20 @@ while running :
     for event in pygame.event.get():
         if event.type == pygame.MOUSEBUTTONDOWN: # 클릭 event
             if ball_fit_pos (pygame.mouse.get_pos(), board, ball) in ball.black['pos'] or ball_fit_pos (pygame.mouse.get_pos(), board, ball) in ball.white['pos']: # 기존에 착수된 위치에 놓을 시
-                print('착수된 위치')
+                print('이미 착수된 위치')
                 continue
-            elif turn%2 == 0:
-                ball.black['pos'].append(ball_fit_pos (pygame.mouse.get_pos(), board, ball))
-            else:
+            elif ball_fit_pos(pygame.mouse.get_pos(), board, ball) == 0:  # 잘못된 위치에 착수
+                print('정확한 위치에 다시 놓아주세요.')
+                continue
+            elif turn%2 == 0: # 흑돌 착수
+                ball.black['pos'].append(ball_fit_pos (pygame.mouse.get_pos(), board, ball)) # 이미지 좌표
+                ball.black['boardPos'].append((gameplay.ballPos_to_boardList(ball_fit_pos (pygame.mouse.get_pos(), board, ball), board))) # 데이터 좌표
+            else: # 백돌 착수
                 ball.white['pos'].append(ball_fit_pos (pygame.mouse.get_pos(), board, ball))
+                ball.white['boardPos'].append(gameplay.ballPos_to_boardList(ball_fit_pos (pygame.mouse.get_pos(), board, ball), board))
             turn += 1
+            
+        
             
             
         if event.type == pygame.QUIT: # X표 클릭
