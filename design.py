@@ -17,12 +17,14 @@ class Board():
         pygame.draw.line(screen, color, start_pos_list, end_pos_list, width)
         return 0;
     
+    
 # 배경 디자인
 class Design():
     def __init__(self):
         self.screen_color = (255,255,255)
         self.screen_size = (700,600)
 
+        
 # 흑돌 백돌
 class Ball():
     def __init__(self):
@@ -40,9 +42,11 @@ class Ball():
 # 화면 그리기
 def draw_screen (screen, design, board, ball, turn):
     screen.fill(design.screen_color)     #화면 색상 변환
+    
       #바둑판
     pygame.draw.rect(screen, board.grid_color,[board.x, board.y, board.size, board.size], board.width)
     pygame.draw.rect(screen, board.b_color,[board.x+(board.width*0.5), board.y+(board.width*0.5), board.size-(board.width), board.size-(board.width)])
+    
     # 격자
     for vertical_line in range(1,20): # 세로줄
         line_x = board.x + vertical_line*board.grid_size
@@ -50,24 +54,23 @@ def draw_screen (screen, design, board, ball, turn):
     for horizontal_line in range(1,20): # 가로줄
         line_y = board.y + horizontal_line * board.grid_size
         board.drawgrid([board.x, line_y], [board.x+board.size-(board.width*0.5), line_y], board.grid_color, 1)
-      # 바둑알
+        
+   # 바둑알
     for position in ball.black['pos']:
         ball.draw(position, 0)
     for position in ball.white['pos']:
         ball.draw(position, 1)
     
+    
 # 착수 위치 조정
 def ball_fit_pos (position, board, ball):
     x=0; y=0; count=0;
-
     x_temp = position[0] - board.x
     y_temp = position[1] - board.y
-    print(x_temp)
-    # 격자 오른쪽을 클릭했을 경우
-    print(f'{x_temp} % {board.grid_size} = {ball.size}')
+
+    # 격자 오른쪽 클릭
     if x_temp % board.grid_size <= ball.size:
         x_temp = x_temp//board.grid_size
-        print(x_temp)
         if (y_temp) % board.grid_size <= ball.size:
             y_temp = y_temp//board.grid_size
         elif (y_temp) % board.grid_size >= board.grid_size - ball.size:
@@ -77,9 +80,8 @@ def ball_fit_pos (position, board, ball):
         x = x_temp*board.grid_size + board.x
         y = y_temp*board.grid_size + board.y
         
-    #오른
+    # 격자 왼쪽 클릭
     elif (x_temp) % board.grid_size >= board.grid_size-ball.size:
-        print(x_temp)
         x_temp = x_temp//board.grid_size + 1
         if (y_temp) % board.grid_size <= ball.size:
             y_temp = y_temp//board.grid_size
@@ -89,13 +91,14 @@ def ball_fit_pos (position, board, ball):
             count=1
         x = x_temp*board.grid_size + board.x
         y = y_temp*board.grid_size + board.y
+        
     else :
         count =1
 
     if count == 1:
         print('정확한 위치에 다시 놓아주세요.')
-    print(f'({x},{y})')
     return (x,y)
+
 
 board = Board()
 design = Design()
@@ -121,20 +124,19 @@ while running :
     # event
     for event in pygame.event.get():
         if event.type == pygame.MOUSEBUTTONDOWN: # 클릭 event
-            print('마우스 위치', pygame.mouse.get_pos())
-            mouse_x = pygame.mouse.get_pos()[0]
-            mouse_y = pygame.mouse.get_pos()[1]
-            if turn%2 == 0:
+            if ball_fit_pos (pygame.mouse.get_pos(), board, ball) in ball.black['pos'] or ball_fit_pos (pygame.mouse.get_pos(), board, ball) in ball.white['pos']: # 기존에 착수된 위치에 놓을 시
+                print('착수된 위치')
+                continue
+            elif turn%2 == 0:
                 ball.black['pos'].append(ball_fit_pos (pygame.mouse.get_pos(), board, ball))
             else:
                 ball.white['pos'].append(ball_fit_pos (pygame.mouse.get_pos(), board, ball))
             turn += 1
             
+            
         if event.type == pygame.QUIT: # X표 클릭
             running = False        
      
-    
-
     pygame.display.flip() # show()
 
 
