@@ -1,7 +1,8 @@
 # 디자인
 
 import pygame
-import numpy
+import numpy as np
+
 
 # 게임 디자인 설정
 class Board():
@@ -21,12 +22,13 @@ class Board():
         pygame.draw.line(screen, color, start_pos_list, end_pos_list, width)
         return 0;
     
-    def newBoardList (self):
+    def newBoardList (self): # 데이터 오목판 리스트 생성
         for i in range(19):
             temp_list = []
             for j in range(19):
                 temp_list.append(0)
             self.board_list.append(temp_list[:])
+            
     
     
 # 배경 디자인
@@ -39,8 +41,8 @@ class Design():
 # 흑돌 백돌
 class Ball():
     def __init__(self):
-        self.black = {'color':(0,0,0), 'num':1, 'pos':[], 'boardPos':[]}
-        self.white = {'color':(255,255,255), 'num':2, 'pos':[], 'boardPos':[]}
+        self.black = {'color':(0,0,0), 'num':1, 'pos':[], 'boardPos':[], 'count':0}
+        self.white = {'color':(255,255,255), 'num':2, 'pos':[], 'boardPos':[], 'count':0}
         self.size = 7
     
     def draw(self, position, turn): #turn은 흑돌 백돌 순서
@@ -61,6 +63,40 @@ class GamePlay():
         ball_list_pos_y = (ball_pos[1] - board.y)//20
         ball_boardList_pos = (ball_list_pos_x, ball_list_pos_y)
         return ball_boardList_pos
+
+    def placeBall (self, ball, turn, position):
+        if turn%2 == 0:
+            if  : # 3 3일때
+                print('3 3 이므로 놓을 수 없습니다.')
+            elif:
+                ball.black['pos'].append(ball_fit_pos (pygame.mouse.get_pos(), board, ball)) # 화면상 좌표
+                ball.black['boardPos'].append((gameplay.ballPos_to_boardList(ball_fit_pos (pygame.mouse.get_pos(), board, ball), board))) # 데이터 배열 상 좌표
+                board.board_list[ball.black['boardPos'][turn//2][1]][ball.black['boardPos'][turn//2][0]] = ball.black['num'] # board_list에 돌 데이터 입력
+        elif turn%2 == 1:
+            ball.white['pos'].append(ball_fit_pos (pygame.mouse.get_pos(), board, ball))
+            ball.white['boardPos'].append(gameplay.ballPos_to_boardList(ball_fit_pos (pygame.mouse.get_pos(), board, ball), board))
+            board.board_list[ball.white['boardPos'][turn//2][1]][ball.white['boardPos'][turn//2][0]] = ball.white['num']
+        return 0
+    
+    def checkBall (self, board, ball):
+        for row in range(19):
+            ball.black[count]=0
+            ball.white[count]=0
+            for column in range(19):
+                board_data = board.board_list[row][column]
+                if board_data == 1:
+                    ball.black[count]+=1
+                elif board_data == 2:
+                    ball.white[count]+=1
+                else:
+                    ball.black[count]=0
+                    ball.white[count]=0
+                if ball.black[count] == 5 or ball.white[count] == 5:
+                    return print(종료)
+        if or : # 가로 5개
+        elif or : # 세로 5개
+        elif or : # 기울기 + 5개
+        elif or : # 기울기 - 5개
     
 # 화면 그리기
 def draw_screen (screen, design, board, ball, turn):
@@ -119,11 +155,10 @@ def ball_fit_pos (position, board, ball):
         count =1
 
     if count == 1:
+        print('정확한 위치에 다시 놓아주세요.')
         return 0
         
     return (x,y)
-
-# 실행
 
 board = Board(); board.newBoardList()
 design = Design()
@@ -155,16 +190,12 @@ while running :
             if ball_fit_pos (pygame.mouse.get_pos(), board, ball) in ball.black['pos'] or ball_fit_pos (pygame.mouse.get_pos(), board, ball) in ball.white['pos']: # 기존에 착수된 위치에 놓을 시
                 print('이미 착수된 위치')
                 continue
-            elif ball_fit_pos(pygame.mouse.get_pos(), board, ball) == 0:  # 잘못된 위치에 착수
+            elif ball_fit_pos(pygame.mouse.get_pos(), board, ball) == 0:  # 
                 print('정확한 위치에 다시 놓아주세요.')
                 continue
-            elif turn%2 == 0: # 흑돌 착수
-                ball.black['pos'].append(ball_fit_pos (pygame.mouse.get_pos(), board, ball)) # 이미지 좌표
-                ball.black['boardPos'].append((gameplay.ballPos_to_boardList(ball_fit_pos (pygame.mouse.get_pos(), board, ball), board))) # 데이터 좌표
-            else: # 백돌 착수
-                ball.white['pos'].append(ball_fit_pos (pygame.mouse.get_pos(), board, ball))
-                ball.white['boardPos'].append(gameplay.ballPos_to_boardList(ball_fit_pos (pygame.mouse.get_pos(), board, ball), board))
+            gameplay.placeBall(ball, turn, pygame.mouse.get_pos()) # 착수
             turn += 1
+            print(np.array(board.board_list))
             
         
             
