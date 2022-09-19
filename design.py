@@ -50,7 +50,10 @@ class Ball():
             pygame.draw.circle(screen, self.black['color'], position, self.size)
         if turn%2 == 1:
             pygame.draw.circle(screen, self.white['color'], position, self.size)
-        
+    
+    def countReset(self):
+        self.black['count']=0
+        self.white['count']=0
         
 class GameRule():
     pass
@@ -64,39 +67,93 @@ class GamePlay():
         ball_boardList_pos = (ball_list_pos_x, ball_list_pos_y)
         return ball_boardList_pos
 
-    def placeBall (self, ball, turn, position):
+    def placeBall (self, ball, turn, position, board):
+        place_pos = None # 돌을 놓은 위치
         if turn%2 == 0:
-            if  : # 3 3일때
-                print('3 3 이므로 놓을 수 없습니다.')
-            elif:
-                ball.black['pos'].append(ball_fit_pos (pygame.mouse.get_pos(), board, ball)) # 화면상 좌표
-                ball.black['boardPos'].append((gameplay.ballPos_to_boardList(ball_fit_pos (pygame.mouse.get_pos(), board, ball), board))) # 데이터 배열 상 좌표
-                board.board_list[ball.black['boardPos'][turn//2][1]][ball.black['boardPos'][turn//2][0]] = ball.black['num'] # board_list에 돌 데이터 입력
+            #if  : # 3 3일때
+            #    print('3 3 이므로 놓을 수 없습니다.')
+            #elif:
+            ball.black['pos'].append(ball_fit_pos (pygame.mouse.get_pos(), board, ball)) # 화면상 좌표
+            ball.black['boardPos'].append((gameplay.ballPos_to_boardList(ball_fit_pos (pygame.mouse.get_pos(), board, ball), board))) # 데이터 배열 상 좌표
+            place_pos = ball.black['boardPos'][turn//2]
+            board.board_list[place_pos[1]][place_pos[0]] = ball.black['num'] # board_list에 돌 데이터 입력
         elif turn%2 == 1:
             ball.white['pos'].append(ball_fit_pos (pygame.mouse.get_pos(), board, ball))
             ball.white['boardPos'].append(gameplay.ballPos_to_boardList(ball_fit_pos (pygame.mouse.get_pos(), board, ball), board))
-            board.board_list[ball.white['boardPos'][turn//2][1]][ball.white['boardPos'][turn//2][0]] = ball.white['num']
-        return 0
+            place_pos = ball.white['boardPos'][turn//2]
+            board.board_list[place_pos[1]][place_pos[0]] = ball.white['num']
+        self.checkBall(board, ball, place_pos)
     
-    def checkBall (self, board, ball):
-        for row in range(19):
-            ball.black[count]=0
-            ball.white[count]=0
-            for column in range(19):
-                board_data = board.board_list[row][column]
-                if board_data == 1:
-                    ball.black[count]+=1
-                elif board_data == 2:
-                    ball.white[count]+=1
+    def checkBall (self, board, ball, board_pos): # 놓은 돌을 기준으로 5개 확인
+        x = board_pos[0]
+        y= board_pos[1]
+        ball_num = board.board_list[y][x]
+        
+    # 가로 5개 확인
+        if x < 4:  # 바둑판 끝부분이라서 놓은 돌을 기준 좌측으로 5개가 안될 때
+            before_adjust_start_x = x
+        else:
+            before_adjust_start_x = 4
+        for i in range(before_adjust_start_x,0,-1): # 확인할 시작지점 조정
+            count = 0
+            start_x = x-i
+            if start_x >= 15:
+                break
+            for j in range(5): # 5개 확인
+                if ball_num == board.board_list[y][start_x+j]:
+                    count += 1
+                    if count == 5:
+                        return print(" 끝 ")                        
                 else:
-                    ball.black[count]=0
-                    ball.white[count]=0
-                if ball.black[count] == 5 or ball.white[count] == 5:
-                    return print(종료)
-        if or : # 가로 5개
-        elif or : # 세로 5개
-        elif or : # 기울기 + 5개
-        elif or : # 기울기 - 5개
+                    break
+                    
+    # 세로 5개 확인
+        if y < 4: # 바둑판 끝부분일때
+            before_adjust_start_y = y
+        else:
+            before_adjust_start_y = 4
+        
+        for i in range(y,0,-1):
+            count = 0
+            start_y = y-i
+            if start_y >= 15:
+                break
+            for j in range(5): 
+                if ball_num == board.board_list[start_y+j][x]:
+                    count += 1
+                    if count == 5:
+                        return print(" 끝 ")                        
+                else:
+                    break
+    # 우하향 대각선
+        if x < 4:
+            before_adjust_start_x = x
+        else:
+            before_adjust_start_x = 4
+        if y < 4:
+            before_adjust_start_y = y
+        else:
+            before_adjust_start_y = 4
+            
+        if before_adjust_start_x < before_adjust_start_y:
+            before_adjust_start_point = before_adjust_start_x
+        else:
+            before_adjust_start_point = before_adjust_start_y
+            
+        for i in range(before_adjust_start_point,0,-1):
+            count = 0
+            start_point = before_adjust_start_point - i
+            if start_point >= 15:
+                break
+            for j in range(4):
+                if ball_num == board.board_list[start_point+j][start_point+j]:
+                    count += 1
+                    if count == 5:
+                        return print(" 끝 ")
+                else:
+                    break
+    # 우상향 대각선
+
     
 # 화면 그리기
 def draw_screen (screen, design, board, ball, turn):
@@ -193,9 +250,8 @@ while running :
             elif ball_fit_pos(pygame.mouse.get_pos(), board, ball) == 0:  # 
                 print('정확한 위치에 다시 놓아주세요.')
                 continue
-            gameplay.placeBall(ball, turn, pygame.mouse.get_pos()) # 착수
+            gameplay.placeBall(ball, turn, pygame.mouse.get_pos(), board) # 착수
             turn += 1
-            print(np.array(board.board_list))
             
         
             
