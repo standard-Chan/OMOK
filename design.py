@@ -90,11 +90,11 @@ class GamePlay():
         ball_num = board.board_list[y][x]
         
     # 가로 5개 확인
-        if x < 4:  # 바둑판 끝부분이라서 놓은 돌을 기준 좌측으로 5개가 안될 때
+        if x < 4:  # 바둑판 왼쪽 끝부분이라서 놓은 돌을 기준 좌측으로 5개가 안될 때
             before_adjust_start_x = x
         else:
             before_adjust_start_x = 4
-        for i in range(before_adjust_start_x,0,-1): # 확인할 시작지점 조정
+        for i in range(before_adjust_start_x,-1,-1): # 확인할 시작지점 조정
             count = 0
             start_x = x-i
             if start_x >= 15:
@@ -108,12 +108,12 @@ class GamePlay():
                     break
                     
     # 세로 5개 확인
-        if y < 4: # 바둑판 끝부분일때
+        if y < 4: # 바둑판 윗쪽 끝부분일때
             before_adjust_start_y = y
         else:
             before_adjust_start_y = 4
         
-        for i in range(y,0,-1):
+        for i in range(y,-1,-1):
             count = 0
             start_y = y-i
             if start_y >= 15:
@@ -140,19 +140,47 @@ class GamePlay():
         else:
             before_adjust_start_point = before_adjust_start_y
             
-        for i in range(before_adjust_start_point,0,-1):
+        for i in range(before_adjust_start_point,-1,-1):
             count = 0
-            start_point = before_adjust_start_point - i
-            if start_point >= 15:
+            start_point_x = x - i
+            start_point_y = y - i
+            if start_point_x >= 15 or start_point_y >= 15:
                 break
-            for j in range(4):
-                if ball_num == board.board_list[start_point+j][start_point+j]:
+            for j in range(5):
+                if ball_num == board.board_list[start_point_y+j][start_point_x+j]:
                     count += 1
                     if count == 5:
                         return print(" 끝 ")
                 else:
                     break
     # 우상향 대각선
+        if x < 4:
+            before_adjust_start_x = x
+        else:
+            before_adjust_start_x = 4
+        if y > 14:
+            before_adjust_start_y = 18 - y
+        else:
+            before_adjust_start_y = 4
+            
+        if before_adjust_start_x < before_adjust_start_y:
+            before_adjust_start_point = before_adjust_start_x
+        else:
+            before_adjust_start_point = before_adjust_start_y
+            
+        for i in range(before_adjust_start_point,-1,-1):
+            count = 0
+            start_point_x = x - i
+            start_point_y = y + i
+            if start_point_x > 14 or start_point_y < 4:
+                break
+            for j in range(5):
+                if ball_num == board.board_list[start_point_y-j][start_point_x+j]:
+                    count += 1
+                    if count == 5:
+                        return print(" 끝 ")
+                else:
+                    break
 
     
 # 화면 그리기
