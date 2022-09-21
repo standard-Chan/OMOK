@@ -31,12 +31,12 @@ class Board():
             
     
     
-# 배경 디자인
+# 디자인
 class Design():
     def __init__(self):
         self.screen_color = (255,255,255)
         self.screen_size = (700,600)
-
+        self.victory_font = {'font':"arial", 'size':30, 'color':(0,0,0), 'text':["BLACK VICTORY!", "WHITE VICTORY!"]}
         
 # 흑돌 백돌
 class Ball():
@@ -61,6 +61,9 @@ class GameRule():
 class GamePlay():
     def __init__(self):
         pass
+    def gameEnd (self, ball_num):
+        if ball_num == 1:
+            print
     def ballPos_to_boardList(self, ball_pos, board):  # 착수 위치 리스트 인덱스로 반환
         ball_list_pos_x = (ball_pos[0] - board.x)//20
         ball_list_pos_y = (ball_pos[1] - board.y)//20
@@ -82,8 +85,13 @@ class GamePlay():
             ball.white['boardPos'].append(gameplay.ballPos_to_boardList(ball_fit_pos (pygame.mouse.get_pos(), board, ball), board))
             place_pos = ball.white['boardPos'][turn//2]
             board.board_list[place_pos[1]][place_pos[0]] = ball.white['num']
-        self.checkBall(board, ball, place_pos)
-    
+            
+        end = self.checkBall(board, ball, place_pos)
+        if end == 1:
+            return True
+        else:
+            return False
+        
     def checkBall (self, board, ball, board_pos): # 놓은 돌을 기준으로 5개 확인
         x = board_pos[0]
         y= board_pos[1]
@@ -103,7 +111,7 @@ class GamePlay():
                 if ball_num == board.board_list[y][start_x+j]:
                     count += 1
                     if count == 5:
-                        return print(" 끝 ")                        
+                        return 1                     
                 else:
                     break
                     
@@ -122,7 +130,7 @@ class GamePlay():
                 if ball_num == board.board_list[start_y+j][x]:
                     count += 1
                     if count == 5:
-                        return print(" 끝 ")                        
+                        return 1                       
                 else:
                     break
     # 우하향 대각선
@@ -150,7 +158,7 @@ class GamePlay():
                 if ball_num == board.board_list[start_point_y+j][start_point_x+j]:
                     count += 1
                     if count == 5:
-                        return print(" 끝 ")
+                        return 1
                 else:
                     break
     # 우상향 대각선
@@ -178,7 +186,7 @@ class GamePlay():
                 if ball_num == board.board_list[start_point_y-j][start_point_x+j]:
                     count += 1
                     if count == 5:
-                        return print(" 끝 ")
+                        return 1
                 else:
                     break
 
@@ -267,7 +275,7 @@ running = True
 while running :
 
     draw_screen(screen, design, board, ball, turn)
-                
+    
                 
     # event
     for event in pygame.event.get():
@@ -278,8 +286,13 @@ while running :
             elif ball_fit_pos(pygame.mouse.get_pos(), board, ball) == 0:  # 
                 print('정확한 위치에 다시 놓아주세요.')
                 continue
-            gameplay.placeBall(ball, turn, pygame.mouse.get_pos(), board) # 착수
-            turn += 1
+            end = gameplay.placeBall(ball, turn, pygame.mouse.get_pos(), board) # 착수
+            if end == True:
+                font = pygame.font.SysFont(design.victory_font['font'], design.victory_font['size'], True, True)
+                text = font.render(design.victory_font['text'][1], True, design.victory_font['color'])
+                screen.blit(text, (500,500))
+            else:
+                turn += 1
             
         
             
