@@ -38,6 +38,7 @@ class Design():
         self.screen_size = (700,600)
         self.victory_font = {'font':"arial", 'size':30, 'color':(0,0,0), 'text':["BLACK VICTORY!", "WHITE VICTORY!"]}
         
+        
 # 흑돌 백돌
 class Ball():
     def __init__(self):
@@ -55,15 +56,17 @@ class Ball():
         self.black['count']=0
         self.white['count']=0
         
+        
 class GameRule():
     pass
+
 
 class GamePlay():
     def __init__(self):
         pass
     def gameEnd (self, ball_num):
         if ball_num == 1:
-            print
+            print("END")
     def ballPos_to_boardList(self, ball_pos, board):  # 착수 위치 리스트 인덱스로 반환
         ball_list_pos_x = (ball_pos[0] - board.x)//20
         ball_list_pos_y = (ball_pos[1] - board.y)//20
@@ -72,25 +75,19 @@ class GamePlay():
 
     def placeBall (self, ball, turn, position, board):
         place_pos = None # 돌을 놓은 위치
-        if turn%2 == 0:
-            #if  : # 3 3일때
-            #    print('3 3 이므로 놓을 수 없습니다.')
-            #elif:
+        if turn%2 == 0: # 흑돌
             ball.black['pos'].append(ball_fit_pos (pygame.mouse.get_pos(), board, ball)) # 화면상 좌표
             ball.black['boardPos'].append((gameplay.ballPos_to_boardList(ball_fit_pos (pygame.mouse.get_pos(), board, ball), board))) # 데이터 배열 상 좌표
             place_pos = ball.black['boardPos'][turn//2]
             board.board_list[place_pos[1]][place_pos[0]] = ball.black['num'] # board_list에 돌 데이터 입력
-        elif turn%2 == 1:
+        elif turn%2 == 1: # 백돌
             ball.white['pos'].append(ball_fit_pos (pygame.mouse.get_pos(), board, ball))
             ball.white['boardPos'].append(gameplay.ballPos_to_boardList(ball_fit_pos (pygame.mouse.get_pos(), board, ball), board))
             place_pos = ball.white['boardPos'][turn//2]
             board.board_list[place_pos[1]][place_pos[0]] = ball.white['num']
             
         end = self.checkBall(board, ball, place_pos)
-        if end == 1:
-            return True
-        else:
-            return False
+        return end
         
     def checkBall (self, board, ball, board_pos): # 놓은 돌을 기준으로 5개 확인
         x = board_pos[0]
@@ -189,16 +186,27 @@ class GamePlay():
                         return 1
                 else:
                     break
+        return 0
 
     
+    
 # 화면 그리기
-def draw_screen (screen, design, board, ball, turn):
+def draw_screen (screen, design, board, ball, turn, end):
     screen.fill(design.screen_color)     #화면 색상 변환
+    font = pygame.font.SysFont(design.victory_font['font'], design.victory_font['size'], True, True)
+    text2 = font.render('regame', True, design.victory_font['color'])
+    if (end):
+        if (turn%2==1):
+            text = font.render(design.victory_font['text'][0], True, design.victory_font['color'])
+        else:
+            text = font.render(design.victory_font['text'][1], True, design.victory_font['color'])
+        screen.blit(text, (150,500))
     
       #바둑판
     pygame.draw.rect(screen, board.grid_color,[board.x, board.y, board.size, board.size], board.width)
     pygame.draw.rect(screen, board.b_color,[board.x+(board.width*0.5), board.y+(board.width*0.5), board.size-(board.width), board.size-(board.width)])
-    
+    pygame.draw.rect(screen, (200,200,200),[500, 100, 130, 50], width=0)
+    screen.blit(text2, (510,105))
     # 격자
     for vertical_line in range(1,20): # 세로줄
         line_x = board.x + vertical_line*board.grid_size
@@ -212,6 +220,7 @@ def draw_screen (screen, design, board, ball, turn):
         ball.draw(position, 0)
     for position in ball.white['pos']:
         ball.draw(position, 1)
+    
     
     
 # 착수 위치 조정
@@ -253,6 +262,7 @@ def ball_fit_pos (position, board, ball):
         
     return (x,y)
 
+
 board = Board(); board.newBoardList()
 design = Design()
 ball = Ball()
@@ -271,28 +281,22 @@ pygame.display.set_caption("OMOK")    # 타이틀바 텍스트 설정
 
 # 실행
 running = True
-
+end = 0
+state=''
 while running :
-
-    draw_screen(screen, design, board, ball, turn)
-    
-                
+    draw_screen(screen, design, board, ball, turn, end)
+    state=''
     # event
     for event in pygame.event.get():
         if event.type == pygame.MOUSEBUTTONDOWN: # 클릭 event
             if ball_fit_pos (pygame.mouse.get_pos(), board, ball) in ball.black['pos'] or ball_fit_pos (pygame.mouse.get_pos(), board, ball) in ball.white['pos']: # 기존에 착수된 위치에 놓을 시
-                print('이미 착수된 위치')
+                state = '이미 착수된 위치'
                 continue
             elif ball_fit_pos(pygame.mouse.get_pos(), board, ball) == 0:  # 
-                print('정확한 위치에 다시 놓아주세요.')
+                state = '정확한 위치에 다시 놓아주세요.'
                 continue
             end = gameplay.placeBall(ball, turn, pygame.mouse.get_pos(), board) # 착수
-            if end == True:
-                font = pygame.font.SysFont(design.victory_font['font'], design.victory_font['size'], True, True)
-                text = font.render(design.victory_font['text'][1], True, design.victory_font['color'])
-                screen.blit(text, (500,500))
-            else:
-                turn += 1
+            turn += 1
             
         
             
